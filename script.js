@@ -1,4 +1,4 @@
-const asteroidCount = 25;
+const asteroidCount = 30;
 const maxAsteroidSize = 30;
 const projectileVelocity = 4;
 let animationID = null;
@@ -6,7 +6,8 @@ const asterioids = [];
 const deadAsteroids = [];
 
 // const colors = ['lightgreen', 'lightblue', 'yellow', 'lightpink', 'lightgray', 'lightcoral', 'lightskyblue', 'lightcyan'];
-const colors = ['lightpink', 'lightgray', 'D7E0E4', 'lightyellow', 'lightskyblue', 'lightgreen'];
+// const colors = ['lightpink', 'lightgray', 'D7E0E4', 'lightyellow', 'lightskyblue', 'lightgreen', 'medkit'];
+const colors = ['medkit', 'lightgreen', 'lightgray'];
 
 function randomColor(colors) {
   const index = Math.floor(Math.random()*colors.length)
@@ -128,6 +129,7 @@ class GameObject {
 class Asteroid extends GameObject {
   // deadAsteroids;
   animationID;
+  medkit = false;
   radius = (Math.random() * maxAsteroidSize) + 10;
   velocity = { x: Math.random() * -4 + 2, y: Math.random() * -4 + 2 };
   // velocity = { x: Math.random() * -0.6 + 0.3, y: Math.random() * -0.6 + 0.3 };
@@ -198,9 +200,19 @@ class Asteroid extends GameObject {
     // this.position.y = position.y
     this.div = document.createElement('div');
     this.div.classList.add('asteroid');
-    this.div.style.width = this.radius * 2 + 'px';
-    this.div.style.height = this.radius * 2 + 'px';
-    this.div.classList.add(randomColor(colors));
+    const cssClass = randomColor(colors);
+    if (cssClass === 'medkit') {
+      this.medkit = true
+      this.div.style.width = 30 + "px";
+      this.div.style.height = 30 + "px";
+      this.radius = 15;
+    } else {
+      this.div.style.width = this.radius * 2 + "px";
+      this.div.style.height = this.radius * 2 + "px";
+    }
+
+    
+    this.div.classList.add(cssClass);
   }
 
   move() {
@@ -284,31 +296,58 @@ class Asteroid extends GameObject {
 //////////////////////////////////////////////////////
 
 class Ship extends GameObject {
+  timeID;
   angle = 0;
   radius = 50;
-  velocity = {x: 0, y: 0};
+  velocity = { x: 0, y: 0 };
   collision = false;
   constructor(position) {
     super();
     // this.position = {x: getComputedStyle(ship).left, y: getComputedStyle(ship).top};
-    this.position = {x: window.innerWidth/2, y: window.innerHeight/2};
+    this.position = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
     this.div = ship;
     // this.div.classList.add('space-ship');
   }
 
-  detectCollisionWith(obj) {    
+  detectCollisionWith(obj) {
     let dy = this.position.y - obj.position.y;
     let dx = this.position.x - obj.position.x;
 
     const dist = Math.hypot(dx, dy);
 
     if (dist < this.radius + obj.radius + 0) {
+      if (obj.medkit) {
+        obj.div.classList.add("medkitdead");
+        spShipContainer.classList.add("medkithit");
+        if (this.timeID) {
+          clearTimeout(this.timeID);
 
-      obj.div.classList.add('deadred');
-      obj.move = obj.moveDead
+          // spShipContainer.classList.remove("medkithit"); // Resets class animation on the run
+          // void spShipContainer.offsetWidth;
+          // _ = spShipContainer.offsetWidth;
+          // spShipContainer.classList.add('medkithit');
+
+          spShipContainer.classList.remove("medkithit"); // Resets class animation as soon as possible
+          setTimeout(() => {
+            spShipContainer.classList.add("medkithit");
+          });
+          this.timeID = setTimeout(() => {
+            spShipContainer.classList.remove("medkithit");
+            this.timeID = 0;
+          }, 300);
+        } else {
+          this.timeID = setTimeout(() => {
+            spShipContainer.classList.remove("medkithit");
+            this.timeID = 0;
+          }, 300);
+        }
+      } else {
+        obj.div.classList.add("deadred");
+      }
+
+      obj.move = obj.moveDead;
       deadAsteroids.push(obj);
-
     }
   }
 }
@@ -482,6 +521,11 @@ asterioids.forEach((asteroid) => {
 });
 
 function gameCycle() {
+  if(asterioids.length < asteroidCount) { // Add a new asteroid when the number of asteroids is below the set limit
+    const asteroid = new Asteroid();
+    asterioids.push(asteroid);
+    asteroid.addTo(body);
+  }
   for (let asteroid of asterioids) {
     asteroid.move();
     asteroid.detectFrameCollision();
