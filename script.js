@@ -1,43 +1,60 @@
-const asteroidCount = 30;
+const asteroidCount = 10;
 const maxAsteroidSize = 30;
 const projectileVelocity = 4;
 let animationID = null;
 const asterioids = [];
 const deadAsteroids = [];
+const timeout = 30;
 
 // const colors = ['lightgreen', 'lightblue', 'yellow', 'lightpink', 'lightgray', 'lightcoral', 'lightskyblue', 'lightcyan'];
-// const colors = ['lightpink', 'lightgray', 'D7E0E4', 'lightyellow', 'lightskyblue', 'lightgreen', 'medkit'];
-const colors = ['medkit', 'lightgreen', 'lightgray'];
+const colors = [
+  "lightpink",
+  "lightgray",
+  "D7E0E4",
+  "lightskyblue",
+  "lightgreen",
+  "medkit",
+];
+// const colors = ['medkit'];
+// const colors = ['lightpink', 'lightgray', 'D7E0E4', 'lightyellow', 'lightskyblue', 'lightgreen'];
 
 function randomColor(colors) {
-  const index = Math.floor(Math.random()*colors.length)
-  return colors[index]
+  const index = Math.floor(Math.random() * colors.length);
+  return colors[index];
 }
+const over = document.querySelector(".gameover");
+const score = document.querySelector(".score");
+score.count = 30;
+score.textContent = `Score: ${score.count}`;
 
-const body = document.querySelector('.scene');
+const timer = document.querySelector(".timer");
+timer.count = timeout;
+timer.textContent = `Time: ${timer.count}s`;
 
-const ship = document.querySelector('.space-ship');
-const spShipContainer = document.querySelector('.spship-container');
+const scene = document.querySelector(".scene");
+
+const ship = document.querySelector(".space-ship");
+const spShipContainer = document.querySelector(".spship-container");
 ship.draggable = false; // ship.setAttribute('draggable', false);
 spShipContainer.draggable = false;
 
-const asteroid = document.querySelector('.asteroid');
+const asteroid = document.querySelector(".asteroid");
 
-const button = document.querySelector('button');
+const button = document.querySelector("button");
 
-button.addEventListener('click', (e) => {
+button.addEventListener("click", (e) => {
   e.stopPropagation();
   if (animationID) {
     animationID = cancelAnimationFrame(animationID);
-    e.target.textContent = 'Start';
+    e.target.textContent = "Start";
   } else {
     animationID = requestAnimationFrame(gameCycle);
-    e.target.textContent = 'Pause';
+    e.target.textContent = "Pause";
   }
 });
 
-body.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
+scene.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
     // fire();
   }
 });
@@ -74,19 +91,7 @@ const center = {
 // center.y = document.documentElement.clientHeight / 2;
 let delta = 0.1;
 // let prevAngle = 0;
-body.addEventListener('click', (e) => {
-  spaceShip.angle =
-    90 -
-    Math.atan2(center.y - e.clientY, e.clientX - center.x) * (180 / Math.PI);
-// prevAngle = spaceShip.angle
-  ship.style.setProperty(
-    'transform',
-    // `translate(${center.x - 50}px, ${center.y - 50}px) rotate(${spaceShip.angle}deg)`
-    `rotate(${spaceShip.angle + delta}deg)`
-  );
-  p.shot = true;
-  delta = -delta;
-});
+scene.addEventListener("click", callback);
 
 // window.addEventListener('load', (e) => {
 //   ship.style.setProperty(
@@ -94,6 +99,19 @@ body.addEventListener('click', (e) => {
 //     `translate(${center.x - 50}px, ${center.y - 50}px)`
 //   );
 // });
+function callback(e) {
+  spaceShip.angle =
+    90 -
+    Math.atan2(center.y - e.clientY, e.clientX - center.x) * (180 / Math.PI);
+  // prevAngle = spaceShip.angle
+  ship.style.setProperty(
+    "transform",
+    // `translate(${center.x - 50}px, ${center.y - 50}px) rotate(${spaceShip.angle}deg)`
+    `rotate(${spaceShip.angle + delta}deg)`
+  );
+  p.shot = true;
+  delta = -delta;
+}
 
 ////////////////// class GameObject //////////////////
 
@@ -108,7 +126,11 @@ class GameObject {
     container.appendChild(this.div);
   }
 
-  detectFrameCollision(position = this.position, velocity = this.velocity, radius = this.radius) {
+  detectFrameCollision(
+    position = this.position,
+    velocity = this.velocity,
+    radius = this.radius
+  ) {
     if (position.x + radius > window.innerWidth) {
       velocity.x = -Math.abs(velocity.x);
     }
@@ -130,7 +152,7 @@ class Asteroid extends GameObject {
   // deadAsteroids;
   animationID;
   medkit = false;
-  radius = (Math.random() * maxAsteroidSize) + 10;
+  radius = Math.random() * maxAsteroidSize + 10;
   velocity = { x: Math.random() * -4 + 2, y: Math.random() * -4 + 2 };
   // velocity = { x: Math.random() * -0.6 + 0.3, y: Math.random() * -0.6 + 0.3 };
 
@@ -141,56 +163,73 @@ class Asteroid extends GameObject {
   // };
 
   position = (() => {
-    const rectA = { x: -200, y: -200, width: window.innerWidth + 400, height: window.innerHeight + 400 };
-    const rectB = { x: 0, y: 0, width: window.innerWidth, height: window.innerHeight };
+    const rectA = {
+      x: -200,
+      y: -200,
+      width: window.innerWidth + 400,
+      height: window.innerHeight + 400,
+    };
+    const rectB = {
+      x: 0,
+      y: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
 
-    return  this.getRandomCoord(rectA, rectB);
+    return this.getRandomCoord(rectA, rectB);
   })();
 
   getRandomCoord(rectA, rectB) {
     const zones = [];
-  
+
     // Define each exclusion zone
     if (rectB.y > rectA.y) {
-      zones.push('top');
+      zones.push("top");
     }
     if (rectB.y + rectB.height < rectA.y + rectA.height) {
-      zones.push('bottom');
+      zones.push("bottom");
     }
     if (rectB.x > rectA.x) {
-      zones.push('left');
+      zones.push("left");
     }
     if (rectB.x + rectB.width < rectA.x + rectA.width) {
-      zones.push('right');
+      zones.push("right");
     }
-  
+
     while (true) {
       const zone = zones[Math.floor(Math.random() * zones.length)];
       let x, y;
-  
+
       switch (zone) {
-        case 'top':
+        case "top":
           x = Math.random() * rectA.width + rectA.x;
           y = Math.random() * (rectB.y - rectA.y) + rectA.y;
           break;
-        case 'bottom':
+        case "bottom":
           x = Math.random() * rectA.width + rectA.x;
-          y = Math.random() * ((rectA.y + rectA.height) - (rectB.y + rectB.height)) + rectB.y + rectB.height;
+          y =
+            Math.random() *
+              (rectA.y + rectA.height - (rectB.y + rectB.height)) +
+            rectB.y +
+            rectB.height;
           break;
-        case 'left':
+        case "left":
           x = Math.random() * (rectB.x - rectA.x) + rectA.x;
           y = Math.random() * rectA.height + rectA.y;
           break;
-        case 'right':
-          x = Math.random() * ((rectA.x + rectA.width) - (rectB.x + rectB.width)) + rectB.x + rectB.width;
+        case "right":
+          x =
+            Math.random() * (rectA.x + rectA.width - (rectB.x + rectB.width)) +
+            rectB.x +
+            rectB.width;
           y = Math.random() * rectA.height + rectA.y;
           break;
       }
-  
+
       return { x, y };
     }
   }
-  
+
   // constructor(velocity, position) {
   constructor() {
     super();
@@ -198,11 +237,11 @@ class Asteroid extends GameObject {
     // this.velocity.y = velocity.y;
     // this.position.x = position.x;
     // this.position.y = position.y
-    this.div = document.createElement('div');
-    this.div.classList.add('asteroid');
+    this.div = document.createElement("div");
+    this.div.classList.add("asteroid");
     const cssClass = randomColor(colors);
-    if (cssClass === 'medkit') {
-      this.medkit = true
+    if (cssClass === "medkit") {
+      this.medkit = true;
       this.div.style.width = 30 + "px";
       this.div.style.height = 30 + "px";
       this.radius = 15;
@@ -211,7 +250,6 @@ class Asteroid extends GameObject {
       this.div.style.height = this.radius * 2 + "px";
     }
 
-    
     this.div.classList.add(cssClass);
   }
 
@@ -228,8 +266,8 @@ class Asteroid extends GameObject {
     // console.log(getComputedStyle(this.div).top, getComputedStyle(this.div).left);
     requestAnimationFrame(() => {
       // this.div.style.transform = `translate(
-        // ${0}px,
-        // ${0}px)`;
+      // ${0}px,
+      // ${0}px)`;
       this.div.style.transform = `translate(
           ${this.position.x - this.radius}px,
           ${this.position.y - this.radius}px)`;
@@ -238,11 +276,10 @@ class Asteroid extends GameObject {
       //   ${this.position.y}px)`;
     });
   }
-  
+
   moveDead() {
     // this.position.x += this.velocity.x;
     // this.position.y += this.velocity.y;
-
     // console.log(getComputedStyle(this.div).top, getComputedStyle(this.div).left);
     // requestAnimationFrame(() => {
     //   this.velocity.x *= 0.98;
@@ -318,6 +355,8 @@ class Ship extends GameObject {
 
     if (dist < this.radius + obj.radius + 0) {
       if (obj.medkit) {
+        score.count += 10;
+        score.textContent = `Score: ${score.count}`;
         obj.div.classList.add("medkitdead");
         spShipContainer.classList.add("medkithit");
         if (this.timeID) {
@@ -344,6 +383,8 @@ class Ship extends GameObject {
         }
       } else {
         obj.div.classList.add("deadred");
+        score.count -= 10;
+        score.textContent = `Score: ${score.count}`;
       }
 
       obj.move = obj.moveDead;
@@ -372,27 +413,27 @@ class Projectile extends GameObject {
     this.velocity.x = projectileVelocity;
     this.velocity.y = projectileVelocity;
     this.radius = 10;
-    this.div = document.createElement('div');
+    this.div = document.createElement("div");
     // let img = this.div.appendChild(document.createElement('img'));
     // img.src = 'img/arrow.svg';
     // img.classList.add('projectile-angle');
-    this.div.classList.add('projectile');
+    this.div.classList.add("projectile");
     // this.callback = this.imTired.bind(this);
     this.callback = () => {
       if (this.shot) {
-        this.spaceShip.div.removeEventListener('transitionend', this.callback);
+        this.spaceShip.div.removeEventListener("transitionend", this.callback);
         this.shot = false;
         this.angle = (this.spaceShip.angle - 90) * (Math.PI / 180); //
         // this.angle = 0;
-        this.cos =  Math.cos(this.angle);
-        this.sin =  Math.sin(this.angle);
+        this.cos = Math.cos(this.angle);
+        this.sin = Math.sin(this.angle);
         this.fire();
         p = new Projectile(spaceShip);
         p.addTo(spShipContainer);
       }
     };
     // this.spaceShip.div.addEventListener('transitionend', projectileListener);
-    this.spaceShip.div.addEventListener('transitionend', this.callback);
+    this.spaceShip.div.addEventListener("transitionend", this.callback);
   }
 
   fire() {
@@ -405,13 +446,13 @@ class Projectile extends GameObject {
     // this.div.style.transform = `translate(${proj.left - bodyRect.left}px, ${proj.right - bodyRect.top}px)) rotate(${this.spaceShip.angle}deg)`;
     this.position.x = this.rect.x;
     this.position.y = this.rect.y;
-    body.appendChild(this.div);
+    scene.appendChild(this.div);
     this.shot = false;
     setTimeout(() => {
       this.dead = true;
       this.div.remove();
-      this.detectCollisionWith = ()=>{};
-      this.move = ()=>{};
+      this.detectCollisionWith = () => {};
+      this.move = () => {};
     }, 5000);
     this.move();
   }
@@ -430,24 +471,24 @@ class Projectile extends GameObject {
     this.position.x += this.velocity.x * this.cos;
     this.position.y += this.velocity.y * this.sin;
 
-    if(this.counter > 4) {
+    if (this.counter > 4) {
       this.counter = 0;
-      const dot = document.createElement('div');
+      const dot = document.createElement("div");
       this.dots.push(dot);
-      dot.classList.add('dot');
-      dot.style.left = this.position.x+12 + 'px';
-      dot.style.top = this.position.y+12 + 'px';
-      document.body.appendChild(dot);
+      dot.classList.add("dot");
+      dot.style.left = this.position.x + 12 + "px";
+      dot.style.top = this.position.y + 12 + "px";
+      scene.appendChild(dot);
       setTimeout(() => {
-        dot.classList.add('grow');
+        dot.classList.add("grow");
       });
       setTimeout(() => {
-        if(this.dead) {
+        if (this.dead) {
           // if(true) {
           // dot.remove();
-          this.dots.forEach(dot => {
+          this.dots.forEach((dot) => {
             dot.remove();
-          })
+          });
         } else {
           dot.remove();
         }
@@ -462,7 +503,6 @@ class Projectile extends GameObject {
     // setTimeout(() => {
     //   dot.remove();
     // }, 500);
-    
 
     requestAnimationFrame(() => {
       // Dependency 001
@@ -481,24 +521,26 @@ class Projectile extends GameObject {
   }
 
   detectCollisionWith(obj = null) {
-    let dy = (this.position.y + this.rect.height/2) - (obj.position.y);
-    let dx = (this.position.x + this.rect.width/2) - (obj.position.x);
+    let dy = this.position.y + this.rect.height / 2 - obj.position.y;
+    let dx = this.position.x + this.rect.width / 2 - obj.position.x;
 
     const dist = Math.hypot(dx, dy);
 
-    if (dist < (this.radius + obj.radius)) {
+    if (dist < this.radius + obj.radius) {
       // obj.div.remove();
       // obj.div.style.backgroundColor = 'red';
-      obj.div.classList.add('dead');
-      this.div.classList.add('dead-proj');
+      obj.div.classList.add("dead");
+      this.div.classList.add("dead-proj");
       this.dead = true;
-      this.detectCollisionWith = ()=>{};
-      this.move = ()=>{};
+      this.detectCollisionWith = () => {};
+      this.move = () => {};
       // obj.velocity.x = 1;
       // obj.velocity.y = 1;
-      obj.move = obj.moveDead
+      obj.move = obj.moveDead;
       deadAsteroids.push(obj);
       // console.log('collision');
+      score.count += 10;
+      score.textContent = `Score: ${score.count}`;
     }
   }
 }
@@ -508,7 +550,6 @@ const spaceShip = new Ship(0, 0);
 let p = new Projectile(spaceShip);
 p.addTo(spShipContainer);
 
-
 // asterioids.push(new Asteroid({x: 0.5, y: -0.5}, {x: 300, y: 300}));
 // asterioids.push(new Asteroid({x: -0.45, y: -0.45}, {x: 400, y: 320}));
 // asterioids.push(new Asteroid({x: 0.3, y: -0.25}, {x: 200, y: 400}));
@@ -517,14 +558,15 @@ for (let n = 0; n < asteroidCount; n++) {
 }
 
 asterioids.forEach((asteroid) => {
-  asteroid.addTo(body);
+  asteroid.addTo(scene);
 });
 
 function gameCycle() {
-  if(asterioids.length < asteroidCount) { // Add a new asteroid when the number of asteroids is below the set limit
+  if (asterioids.length < asteroidCount) {
+    // Add a new asteroid when the number of asteroids is below the set limit
     const asteroid = new Asteroid();
     asterioids.push(asteroid);
-    asteroid.addTo(body);
+    asteroid.addTo(scene);
   }
   for (let asteroid of asterioids) {
     asteroid.move();
@@ -538,15 +580,54 @@ function gameCycle() {
   for (let i = 0; i < asterioids.length; i++) {
     spaceShip.detectCollisionWith(asterioids[i]);
   }
-  for (let asteroid of deadAsteroids) { // Removing asteroids marked as dead from asteroids array
-    asterioids.splice(asterioids.indexOf(asteroid), 1, asterioids[asterioids.length - 1]);
+  for (let asteroid of deadAsteroids) {
+    // Removing asteroids marked as dead from asteroids array
+    asterioids.splice(
+      asterioids.indexOf(asteroid),
+      1,
+      asterioids[asterioids.length - 1]
+    );
     asterioids.pop();
-    setTimeout(() => { // It's for animaion of dying asteroid before it's complitely removed
+    setTimeout(() => {
+      // It's for animaion of dying asteroid before it's complitely removed
       asteroid.div.remove();
     }, 5000); // 0ms no css animation
   }
   deadAsteroids.length = 0; // just cleaning the deadAsteroids array at a time
+
+  if (score.count <= 0) {
+    // confirm("Game over")
+
+    clearInterval(intervalID);
+    clearTimeout(timeoutlID);
+    scene.classList.add("blur");
+    gameOver();
+    return; // Game over
+  }
   animationID = requestAnimationFrame(gameCycle);
 }
 
 animationID = requestAnimationFrame(gameCycle);
+
+const timeoutlID = setTimeout(() => {
+  score.textContent = `Score: ${score.count}`;
+  clearInterval(intervalID);
+  scene.classList.add("blur");
+  cancelAnimationFrame(animationID);
+  gameOver();
+  // animationID
+}, timeout * 1000);
+
+const intervalID = setInterval(() => {
+  timer.count -= 1;
+  timer.textContent = `Time: ${timer.count}s`;
+}, 995);
+
+function gameOver() {
+  over.style.visibility = "visible";
+  document.querySelector(".final-score").textContent = `Score: ${score.count}`;
+  document.querySelector(
+    ".final-time"
+  ).textContent = `Time left: ${timer.count}s`;
+scene.removeEventListener('click', callback);
+}

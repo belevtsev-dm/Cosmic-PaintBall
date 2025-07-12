@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
     <title>Home</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
@@ -9,13 +10,25 @@
       Remove all code in `styles.css`!
     -->
     <link rel="stylesheet" href="styles.css" />
-  </head>
-  <body class="scene">
-    <button class="button">Pause</button>
-    <!-- <div class="asteroid"></div> -->
-    <!-- <img class="projectile" src="img/projectile.svg"> -->
-    <div class="space-ship"><div class="spship-container"><img src="img/jet01.svg"></div></div>
+</head>
 
+<body>
+    <div class="gameover">
+        <div>Game Over</div>
+        <div class="final-score"></div>
+        <div class="final-time"></div>
+    </div>
+    <div class="scene">
+        <div class="gameover">Game Over</div>
+        <div class="score">Score:</div>
+        <div class="timer">Time:</div>
+        <button class="button">Pause</button>
+
+        <div class="space-ship">
+            <div class="spship-container"><img src="img/jet01.svg"></div>
+        </div>
+    </div>
     <script src="script.js"></script>
-  </body>
+</body>
+
 </html>
